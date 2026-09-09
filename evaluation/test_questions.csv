@@ -1,0 +1,6 @@
+id,category,company,question,expected_answer,expected_source_hint
+1,simple_factual,,What was the total revenue in <YEAR>?,<fill in from the report>,<page/section hint>
+2,simple_factual,,What was the net profit in <YEAR>?,<fill in from the report>,<page/section hint>
+3,two_value_numerical,,What was the revenue growth from <YEAR_A> to <YEAR_B>?,<fill in: growth %>,<page/section hint>
+4,two_value_numerical,,What was the difference in net profit between <YEAR_A> and <YEAR_B>?,<fill in>,<page/section hint>
+5,comparison,,Was net profit higher in <YEAR_A> or <YEAR_B>?,<fill in>,<page/section hint>
