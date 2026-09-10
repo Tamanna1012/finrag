@@ -80,7 +80,7 @@ you're comfortable with everything else.
 ```
 finrag/
 ├── data/
-│   ├── raw_pdfs/       # Apple_2023.pdf / Apple_2024.pdf sample reports are here already
+│   ├── raw_pdfs/       # Apple_2021.pdf ... Apple_2024.pdf sample reports are here already
 │   └── processed/      # generated index (created by embeddings.py, not committed to git)
 ├── notebooks/          # experiments
 ├── src/
@@ -103,12 +103,13 @@ No API key, no PDFs to find, no internet connection needed for this part —
 you'll have a working RAG pipeline in about a minute.
 
 The bundled sample data is **Apple Inc.'s real, publicly reported revenue
-and net income for fiscal years 2023 and 2024** (from Apple's 10-K
-filings), reformatted into two simple one-page PDFs so the pipeline has
-something realistic to run on immediately. Each PDF says clearly that it's
-a compiled summary for this project, not an official Apple document — see
-"A note on the sample data" below before using it anywhere beyond this
-project.
+and net income for fiscal years 2021–2024** (from Apple's 10-K filings),
+reformatted into four simple one-page PDFs so the pipeline has something
+realistic to run on immediately — including a real revenue dip in FY2023
+and a real net income dip in FY2024, so growth questions aren't always a
+plain increase. Each PDF says clearly that it's a compiled summary for
+this project, not an official Apple document — see "A note on the sample
+data" below before using it anywhere beyond this project.
 
 ```bash
 git clone https://github.com/Tamanna1012/finrag
@@ -151,7 +152,7 @@ Then open `evaluation/results.csv` and compare `system_answer` to
 
 ## A note on the sample data
 
-`data/raw_pdfs/Apple_2023.pdf` and `Apple_2024.pdf` contain Apple's actual
+`data/raw_pdfs/Apple_2021.pdf` through `Apple_2024.pdf` contain Apple's actual
 publicly reported revenue and net income figures, reformatted into a
 simple one-page summary so the ingestion pipeline has something realistic
 to chunk and search — this is not the official Apple 10-K filing itself,
@@ -211,8 +212,10 @@ If you're new to RAG, work through this order:
 
 ## Evaluation
 
-`evaluation/test_questions.csv` has a small manually-written test set split
-into simple factual and two-value numerical questions. Run
+`evaluation/test_questions.csv` has a 20-question manually-written test set
+(within the 20-50 range a project like this should aim for) split across
+all three categories: simple factual, two-value numerical, and comparison.
+Run
 `python evaluation/evaluate.py`, then manually check each row in the
 generated `evaluation/results.csv` for four things:
 - **Answer correctness** — does the answer match what the report actually says?
