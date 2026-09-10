@@ -152,6 +152,17 @@ Then open `evaluation/results.csv` and compare `system_answer` to
 4. Write real questions and answers into `evaluation/test_questions.csv`
    (read the PDF yourself to know the correct answer first).
 
+**If you load more than one company**, always pass the company name (the
+`company=` argument in `rag.py`, or the "Company filter" field in the UI).
+Tested behavior: with the filter set, retrieval correctly isolates that
+company's chunks every time. Without it, the system has no way to know
+which company a question is about — it just picks whichever chunks score
+highest, which can end up mixing two companies' numbers into one
+"calculation" without any warning. This isn't a bug to fix; deciding which
+company a question refers to is a real NLP problem (entity resolution) that
+is intentionally out of scope here. Knowing this limitation — and why it's
+out of scope — is itself a good interview answer.
+
 ## Example
 
 Question: *"What was the revenue growth from 2023 to 2024?"*
