@@ -9,7 +9,7 @@ from ingestion import Chunk
 
 # Matches figures like "450 crore", "Rs. 1,234.5 million", "$540,000", "20%"
 _NUMBER_PATTERN = re.compile(
-    r"(?:rs\.?|inr|\$|₹)?\s*([\d,]+(?:\.\d+)?)\s*(crore|million|billion|lakh)?",
+    r"(?:rs\.?|inr|\$|₹)?\s*(\d[\d,]*(?:\.\d+)?)\s*(crore|million|billion|lakh)?",
     re.IGNORECASE,
 )
 

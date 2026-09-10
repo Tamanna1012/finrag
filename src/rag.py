@@ -22,7 +22,7 @@ clear answer using ONLY the given information. Do not invent numbers. If a
 calculated result is provided, state it plainly."""
 
 # A question is treated as "two-value" if it mentions two distinct years.
-_YEAR_PATTERN = re.compile(r"\b(19|20)\d{2}\b")
+_YEAR_PATTERN = re.compile(r"\b((?:19|20)\d{2})\b")
 
 
 def _detect_years(question: str) -> list[str]:
