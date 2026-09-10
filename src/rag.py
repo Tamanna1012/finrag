@@ -40,6 +40,19 @@ def _detect_operation(question: str) -> str:
     return "growth_percent"  # reasonable default for "compare two years" questions
 
 
+def _detect_metric_keyword(question: str) -> str | None:
+    """
+    A chunk often mentions several figures (revenue, profit, ...), so we need
+    to know which one the question is actually asking about.
+    """
+    q = question.lower()
+    if "profit" in q:
+        return "profit"
+    if "revenue" in q or "sales" in q:
+        return "revenue"
+    return None
+
+
 class FinRAG:
     def __init__(self, index_dir: str = "data/processed", top_k: int = 3):
         self.retriever = Retriever(index_dir)
@@ -82,8 +95,9 @@ class FinRAG:
         chunks_b = self.retriever.search(f"{question} {year_b}", top_k=self.top_k,
                                           company=company, year=year_b)
 
-        value_a = extract_primary_number(chunks_a[0]) if chunks_a else None
-        value_b = extract_primary_number(chunks_b[0]) if chunks_b else None
+        metric_keyword = _detect_metric_keyword(question)
+        value_a = extract_primary_number(chunks_a[0], keyword=metric_keyword) if chunks_a else None
+        value_b = extract_primary_number(chunks_b[0], keyword=metric_keyword) if chunks_b else None
 
         calculation = None
         if value_a is not None and value_b is not None:

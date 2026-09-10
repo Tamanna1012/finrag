@@ -1,61 +1,50 @@
 """
-Level 1: turn chunks into embeddings and store them in a FAISS index.
+Level 1: turn chunks into numeric vectors so we can search them by meaning
+instead of exact text match.
 
-An embedding is a list of numbers that represents the *meaning* of a piece
-of text. FAISS lets us store many embeddings and quickly find the ones
-closest to a new query embedding.
+We use TF-IDF (Term Frequency - Inverse Document Frequency) instead of a
+neural embedding model. TF-IDF turns each chunk into a vector where common
+words (like "the", "company") get a low weight and distinctive words (like
+"revenue", "2024") get a high weight, so chunks sharing distinctive words
+score as similar. It's not as smart as a neural embedding model (it matches
+words, not deeper meaning), but it needs no download, no GPU, and no
+internet connection — good for learning the retrieval part of RAG first.
+Swapping in a neural embedding model later (e.g. sentence-transformers) is
+a drop-in upgrade to this one file.
 """
 
-import json
 import os
 import pickle
 
-import faiss
-import numpy as np
-from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from ingestion import Chunk
 
-MODEL_NAME = "all-MiniLM-L6-v2"  # small, fast, good enough for this project
 
-
-def get_embedding_model() -> SentenceTransformer:
-    return SentenceTransformer(MODEL_NAME)
-
-
-def embed_chunks(chunks: list[Chunk], model: SentenceTransformer) -> np.ndarray:
+def build_vectorizer_and_matrix(chunks: list[Chunk]):
+    """Fit a TF-IDF vectorizer on all chunks and return (vectorizer, matrix)."""
     texts = [chunk.text for chunk in chunks]
-    embeddings = model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
-    return embeddings.astype("float32")
+    vectorizer = TfidfVectorizer(stop_words="english")
+    matrix = vectorizer.fit_transform(texts)
+    return vectorizer, matrix
 
 
-def build_faiss_index(embeddings: np.ndarray) -> faiss.IndexFlatL2:
-    dimension = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings)
-    return index
-
-
-def save_index(index: faiss.IndexFlatL2, chunks: list[Chunk], out_dir: str) -> None:
+def save_index(vectorizer, matrix, chunks: list[Chunk], out_dir: str) -> None:
     os.makedirs(out_dir, exist_ok=True)
-    faiss.write_index(index, os.path.join(out_dir, "index.faiss"))
-    with open(os.path.join(out_dir, "chunks.pkl"), "wb") as f:
-        pickle.dump(chunks, f)
+    with open(os.path.join(out_dir, "index.pkl"), "wb") as f:
+        pickle.dump({"vectorizer": vectorizer, "matrix": matrix, "chunks": chunks}, f)
 
 
-def load_index(out_dir: str) -> tuple[faiss.IndexFlatL2, list[Chunk]]:
-    index = faiss.read_index(os.path.join(out_dir, "index.faiss"))
-    with open(os.path.join(out_dir, "chunks.pkl"), "rb") as f:
-        chunks = pickle.load(f)
-    return index, chunks
+def load_index(out_dir: str):
+    with open(os.path.join(out_dir, "index.pkl"), "rb") as f:
+        data = pickle.load(f)
+    return data["vectorizer"], data["matrix"], data["chunks"]
 
 
 def build_and_save(chunks: list[Chunk], out_dir: str = "data/processed") -> None:
-    model = get_embedding_model()
-    embeddings = embed_chunks(chunks, model)
-    index = build_faiss_index(embeddings)
-    save_index(index, chunks, out_dir)
-    print(f"Saved FAISS index with {len(chunks)} chunks to '{out_dir}'")
+    vectorizer, matrix = build_vectorizer_and_matrix(chunks)
+    save_index(vectorizer, matrix, chunks, out_dir)
+    print(f"Saved TF-IDF index with {len(chunks)} chunks to '{out_dir}'")
 
 
 if __name__ == "__main__":

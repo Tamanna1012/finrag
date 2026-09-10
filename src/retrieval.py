@@ -1,18 +1,22 @@
 """
 Level 1/2: given a question, find the most relevant chunks.
 
-This is the "R" in RAG. We embed the query with the same model used for the
-chunks, then ask FAISS for the nearest neighbours.
+This is the "R" in RAG. We turn the query into the same kind of vector used
+for the chunks (TF-IDF), then rank every chunk by cosine similarity — a
+measure of how much two vectors point in the same direction, which for
+TF-IDF vectors means "how much distinctive vocabulary do these two texts
+share."
 """
 
+from sklearn.metrics.pairwise import cosine_similarity
+
 from ingestion import Chunk
-from embeddings import get_embedding_model, load_index
+from embeddings import load_index
 
 
 class Retriever:
     def __init__(self, index_dir: str = "data/processed"):
-        self.index, self.chunks = load_index(index_dir)
-        self.model = get_embedding_model()
+        self.vectorizer, self.matrix, self.chunks = load_index(index_dir)
 
     def search(self, query: str, top_k: int = 5,
                company: str | None = None, year: str | None = None) -> list[Chunk]:
@@ -21,16 +25,12 @@ class Retriever:
         Optional company/year filters narrow the search to Level 2's
         "financial metadata aware" retrieval.
         """
-        query_embedding = self.model.encode([query], convert_to_numpy=True).astype("float32")
-
-        # Over-fetch, then filter by metadata, since FAISS itself has no filter step.
-        fetch_k = top_k * 5 if (company or year) else top_k
-        distances, indices = self.index.search(query_embedding, fetch_k)
+        query_vector = self.vectorizer.transform([query])
+        scores = cosine_similarity(query_vector, self.matrix)[0]
+        ranked_indices = scores.argsort()[::-1]  # highest similarity first
 
         results = []
-        for idx in indices[0]:
-            if idx == -1:
-                continue
+        for idx in ranked_indices:
             chunk = self.chunks[idx]
             if company and chunk.metadata.get("company") != company:
                 continue

@@ -4,9 +4,11 @@ __pycache__/
 venv/
 .env
 
-# Keep the folders in git but not the (potentially large/private) contents.
-data/raw_pdfs/*
-!data/raw_pdfs/.gitkeep
+# Sample PDFs (DemoCorp_*) are checked in so the project runs out of the box.
+# Your own downloaded annual reports go in data/raw_pdfs/ too, but if they're
+# large or you don't want them in git, add a line like "data/raw_pdfs/MyReport_*.pdf" here.
+
+# The generated index is derived data, not source — don't commit it.
 data/processed/*
 !data/processed/.gitkeep
 
