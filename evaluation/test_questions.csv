@@ -4,3 +4,5 @@ id,category,company,question,expected_answer,expected_source_hint
 3,simple_factual,Apple,What was the net income in 2024?,$93.736 billion,Apple_2024.pdf p.1
 4,two_value_numerical,Apple,What was the revenue growth from 2023 to 2024?,2.02% increase,Apple_2023.pdf p.1; Apple_2024.pdf p.1
 5,two_value_numerical,Apple,What was the difference in net income between 2023 and 2024?,$3.259 billion decrease,Apple_2023.pdf p.1; Apple_2024.pdf p.1
+6,comparison,Apple,Was net income higher in 2023 or 2024?,2023 was higher,Apple_2023.pdf p.1; Apple_2024.pdf p.1
+7,comparison,Apple,Was revenue higher in 2023 or 2024?,2024 was higher,Apple_2023.pdf p.1; Apple_2024.pdf p.1

@@ -37,6 +37,8 @@ def _detect_operation(question: str) -> str:
         return "difference"
     if "ratio" in q or "times" in q:
         return "ratio"
+    if "higher" in q or "lower" in q or "which year" in q or "or" in q.split():
+        return "comparison"
     return "growth_percent"  # reasonable default for "compare two years" questions
 
 
@@ -113,6 +115,13 @@ class FinRAG:
             elif operation == "ratio":
                 result = ratio(value_b, value_a)
                 calculation = f"Ratio {year_b} / {year_a} = {result:.2f}"
+            elif operation == "comparison":
+                if value_a > value_b:
+                    calculation = f"{year_a} ({value_a}) is higher than {year_b} ({value_b})"
+                elif value_b > value_a:
+                    calculation = f"{year_b} ({value_b}) is higher than {year_a} ({value_a})"
+                else:
+                    calculation = f"{year_a} and {year_b} are equal ({value_a})"
 
         all_chunks = chunks_a + chunks_b
         evidence_text = "\n\n".join(
