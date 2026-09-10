@@ -46,6 +46,8 @@ def _detect_metric_keyword(question: str) -> str | None:
     to know which one the question is actually asking about.
     """
     q = question.lower()
+    if "net income" in q or "income" in q:
+        return "income"
     if "profit" in q:
         return "profit"
     if "revenue" in q or "sales" in q:

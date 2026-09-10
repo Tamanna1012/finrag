@@ -80,7 +80,7 @@ you're comfortable with everything else.
 ```
 finrag/
 ├── data/
-│   ├── raw_pdfs/       # DemoCorp_2023.pdf / DemoCorp_2024.pdf sample reports are here already
+│   ├── raw_pdfs/       # Apple_2023.pdf / Apple_2024.pdf sample reports are here already
 │   └── processed/      # generated index (created by embeddings.py, not committed to git)
 ├── notebooks/          # experiments
 ├── src/
@@ -91,7 +91,7 @@ finrag/
 │   ├── rag.py            # ties retrieval + calculation + LLM together
 │   └── app.py            # Streamlit UI
 ├── evaluation/
-│   ├── test_questions.csv  # sample test set (about DemoCorp) — add more once you use real data
+│   ├── test_questions.csv  # sample test set (about the bundled Apple data) — add more once you use your own PDFs
 │   └── evaluate.py         # runs the test set through FinRAG
 ├── requirements.txt
 └── README.md
@@ -102,26 +102,33 @@ finrag/
 No API key, no PDFs to find, no internet connection needed for this part —
 you'll have a working RAG pipeline in about a minute.
 
+The bundled sample data is **Apple Inc.'s real, publicly reported revenue
+and net income for fiscal years 2023 and 2024** (from Apple's 10-K
+filings), reformatted into two simple one-page PDFs so the pipeline has
+something realistic to run on immediately. Each PDF says clearly that it's
+a compiled summary for this project, not an official Apple document — see
+"A note on the sample data" below before using it anywhere beyond this
+project.
+
 ```bash
 git clone https://github.com/Tamanna1012/finrag
 cd finrag
 python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-python src/embeddings.py     # builds the index from the sample DemoCorp PDFs
+python src/embeddings.py     # builds the index from the sample Apple PDFs
 python src/rag.py            # asks "What was the revenue growth from 2023 to 2024?" and prints the answer
 ```
 
 You should see something like:
 ```
 Answer: [LLM not configured — set ANTHROPIC_API_KEY to get a generated explanation. Raw evidence and calculation are shown above.]
-Calculation: Growth from 2023 (4500000000.0) to 2024 (5400000000.0) = 20.00%
+Calculation: Growth from 2023 (383285000000.0) to 2024 (391035000000.0) = 2.02%
 ```
 That confirms the whole pipeline (ingestion → retrieval → two-step
-calculation) is working correctly — the numbers say revenue grew from
-₹450 crore to ₹540 crore, a 20% increase, which is exactly right for the
-sample data. The bracketed message just means no LLM is turning that into a
-sentence yet (see next step).
+calculation) is working correctly — 2.02% is Apple's actual real-world
+revenue growth for that period. The bracketed message just means no LLM is
+turning that into a sentence yet (see next step).
 
 **Optional — get a written-out answer instead of just the raw calculation:**
 ```bash
@@ -142,12 +149,25 @@ Then open `evaluation/results.csv` and compare `system_answer` to
 `expected_answer` yourself — that manual comparison *is* the evaluation
 (see "Evaluation" below).
 
+## A note on the sample data
+
+`data/raw_pdfs/Apple_2023.pdf` and `Apple_2024.pdf` contain Apple's actual
+publicly reported revenue and net income figures, reformatted into a
+simple one-page summary so the ingestion pipeline has something realistic
+to chunk and search — this is not the official Apple 10-K filing itself,
+just its headline numbers restated for this project. **Before citing these
+numbers anywhere outside this project** (a report, an interview, a resume
+claim), verify them against the real filing on
+[SEC EDGAR](https://www.sec.gov/edgar). For your own project work, replace
+these with a real downloaded 10-K PDF as described next — the pipeline
+works the same either way.
+
 ## Using your own real annual reports
 
 1. Download 1–2 PDFs from [SEC EDGAR](https://www.sec.gov/edgar) (US
    companies) or a company's investor relations page.
 2. Name them `Company_Year.pdf` (e.g. `TCS_2024.pdf`) and put them in
-   `data/raw_pdfs/` (alongside or instead of the DemoCorp samples).
+   `data/raw_pdfs/` (alongside or instead of the Apple samples).
 3. Re-run `python src/embeddings.py` to rebuild the index.
 4. Write real questions and answers into `evaluation/test_questions.csv`
    (read the PDF yourself to know the correct answer first).
